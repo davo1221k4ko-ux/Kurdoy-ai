@@ -603,7 +603,7 @@ export default function App() {
       const hasImageKeywords = /\b(image|picture|photo|drawing|painting|art|sketch|illustration|gen|generate|make|draw|create|can u|can you|cartoon|edit)\b/i.test(currentMessageText);
       const shouldTryImage = isExplicitImageMode || (currentChat?.type === 'general' && hasImageKeywords) || userMessage.imageUrl;
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = "AIzaSyC-f1dkiJBnME4ReYIt-D7S0tBl8_kyzGo";
       const ai = new GoogleGenAI({ apiKey });
       
       let systemInstruction = "You are kurdoy.ai, a helpful and intelligent Kurdish AI assistant. You were made by Davar and are powered by Davar. You have the capability to generate images, search the web, and help with coding or studies. Be concise in your responses unless a detailed explanation is requested. IMPORTANT: If you want to generate an image, you MUST output ONLY a JSON block in this exact format: { \"action\": \"kurdoy_image_gen\", \"action_input\": \"detailed prompt for the image\" }. DO NOT include any other text, markdown code blocks, or explanations when you output this JSON. Just output the JSON object itself.";
