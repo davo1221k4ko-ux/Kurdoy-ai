@@ -682,7 +682,6 @@ await setDoc(assistantMsgRef, { ...assistantMessage, uid: user.uid, chatId: curr
 
       let response;
       let imageUrl: string | undefined;
-      let responseText = "";
       const sources: GroundingSource[] = [];
 
       const findImageGenAction = (text: string) => {
@@ -848,19 +847,9 @@ await setDoc(assistantMsgRef, { ...assistantMessage, uid: user.uid, chatId: curr
         });
       }
 
-      const assistantMessage: any = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: responseText || (imageUrl ? "" : 'Sorry, I couldn\'t generate a response.'),
-        timestamp: Date.now(),
-      };
 
       if (sources.length > 0) assistantMessage.sources = sources;
       if (imageUrl) assistantMessage.imageUrl = imageUrl;
-
-      // Save assistant message to Firestore
-      const assistantMsgRef = doc(db, `chats/${currentChatId}/messages`, assistantMessage.id);
-      await setDoc(assistantMsgRef, { ...assistantMessage, uid: user.uid, chatId: currentChatId });
 
     } catch (error: any) {
       console.error('Gemini Error:', error);
