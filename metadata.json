@@ -1,0 +1,5 @@
+{
+  "name": "kurdoy.ai",
+  "description": "kurdoy.ai — A powerful Kurdish AI companion for coding, learning, and creative exploration. Made by Davar.",
+  "requestFramePermissions": ["camera"]
+}
