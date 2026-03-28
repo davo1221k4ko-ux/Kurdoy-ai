@@ -29,7 +29,6 @@ import {
   Paperclip
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleGenAI } from "@google/genai";
 import Markdown from 'react-markdown';
 import { cn } from './lib/utils';
 import { 
@@ -514,6 +513,23 @@ export default function App() {
     }
   };
 
+const callOpenRouter = async (messages: any[]) => {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "mistralai/mistral-7b-instruct:free",
+      messages: messages
+    })
+  });
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "No response";
+};
+
   const handleSend = async () => {
     if (!input.trim() || !currentChatId || isLoading || !user) return;
 
@@ -603,8 +619,32 @@ export default function App() {
       const hasImageKeywords = /\b(image|picture|photo|drawing|painting|art|sketch|illustration|gen|generate|make|draw|create|can u|can you|cartoon|edit)\b/i.test(currentMessageText);
       const shouldTryImage = isExplicitImageMode || (currentChat?.type === 'general' && hasImageKeywords) || userMessage.imageUrl;
 
-      const apiKey = "AIzaSyC-f1dkiJBnME4ReYIt-D7S0tBl8_kyzGo";
-      const ai = new GoogleGenAI({ apiKey });
+      // Build chat history
+const historyMessages = currentChat?.messages.map(m => ({
+  role: m.role === 'user' ? 'user' : 'assistant',
+  content: m.content
+})) || [];
+
+// Add current message
+historyMessages.push({
+  role: "user",
+  content: input
+});
+
+// Call OpenRouter
+const responseText = await callOpenRouter(historyMessages);
+
+// Assistant message
+const assistantMessage: any = {
+  id: (Date.now() + 1).toString(),
+  role: 'assistant',
+  content: responseText,
+  timestamp: Date.now(),
+};
+
+// Save to Firestore
+const assistantMsgRef = doc(db, `chats/${currentChatId}/messages`, assistantMessage.id);
+await setDoc(assistantMsgRef, { ...assistantMessage, uid: user.uid, chatId: currentChatId });
       
       let systemInstruction = "You are kurdoy.ai, a helpful and intelligent Kurdish AI assistant. You were made by Davar and are powered by Davar. You have the capability to generate images, search the web, and help with coding or studies. Be concise in your responses unless a detailed explanation is requested. IMPORTANT: If you want to generate an image, you MUST output ONLY a JSON block in this exact format: { \"action\": \"kurdoy_image_gen\", \"action_input\": \"detailed prompt for the image\" }. DO NOT include any other text, markdown code blocks, or explanations when you output this JSON. Just output the JSON object itself.";
 
